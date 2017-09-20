@@ -44,12 +44,18 @@ public:
         setVel(sf::Vector2f(speed * cos(angle), speed * sin(angle)));
     };
     
-    // Change the velocity's speed and angle
-    void adjustVel(float speed_diff, float angle_diff){
-        float mag = sqrt(vel.x * vel.x + vel.y + vel.y) + speed_diff;
-        float ang = atan2(vel.y, vel.x) + angle_diff;
-        setVel(mag, ang);
+    // Get the speed (magnitude of velocity vector).
+    float getSpeed(){
+        return sqrt(vel.x * vel.x + vel.y * vel.y);
     };
+    
+    // Get the angle of the velocity vector.
+    float getAngle(){
+        return atan2(vel.y, vel.x);
+    };
+    
+    // Change the velocity's speed and angle
+    void adjustVel(float speed_diff, float angle_diff);
     
 private:
     Entity();

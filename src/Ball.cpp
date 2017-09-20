@@ -1,5 +1,6 @@
 #include "Ball.h"
 
+#include <cstdlib>
 #include <iostream>
 #include <string>
 #include <memory>
@@ -30,6 +31,12 @@ void Ball::draw(sf::RenderWindow& window){
     window.draw(circ);
 }
 
+void Ball::boop(){
+    int boop_angle_index = (std::rand() % 360) - 180;
+    adjustVel(BOOP_SPEEDUP, boop_angle_index / (360 * BOOP_STABILITY) );
+    std::cout << "Boop! - " << boop_angle_index << std::endl;
+}
+
 void Ball::tick(sf::Time delta, ENTITY_MAP& others, sf::Vector2u window_size){
     // move according to velocity
     Entity::tick(delta, others, window_size);
@@ -39,11 +46,13 @@ void Ball::tick(sf::Time delta, ENTITY_MAP& others, sf::Vector2u window_size){
     if (pos.x + rad > window_size.x){
         pos.x = window_size.x - rad;
         vel.x = -vel.x;
+        boop();
     }
     // left wall
     if (pos.x - rad < 0){
         pos.x = rad;
         vel.x = -vel.x;
+        boop();
     }
     // bottom wall
     if (pos.y + rad > window_size.y){
@@ -65,15 +74,11 @@ void Ball::tick(sf::Time delta, ENTITY_MAP& others, sf::Vector2u window_size){
             Paddle* paddle = dynamic_cast<Paddle*>(it->second.get());
             int hits = paddle->checkBallCollision(getPos(), getRad());
             
-            //if ((hits & Paddle::ContactStatus::TOP) && (hits & Paddle::ContactStatus::LEFT)) {
-                // hopefully this is the topleft corner
-                
-            //}
-            
             if (hits & Paddle::ContactStatus::TOP){
                 std::cout << "Hit top of paddle " << it->first << std::endl;
                 if (vel.y > 0){
                     vel.y = -vel.y;
+                    boop();
                 }
                 pos.y = paddle->getPos().y - (paddle->getSize().y / 2) - getRad();
             }
@@ -81,6 +86,7 @@ void Ball::tick(sf::Time delta, ENTITY_MAP& others, sf::Vector2u window_size){
                 std::cout << "Hit left of paddle " << it->first << std::endl;
                 if (vel.x > 0){
                     vel.x = -vel.x;
+                    boop();
                 }
                 pos.x = paddle->getPos().x - (paddle->getSize().x / 2) - getRad();
             }
@@ -88,6 +94,7 @@ void Ball::tick(sf::Time delta, ENTITY_MAP& others, sf::Vector2u window_size){
                 std::cout << "Hit bottom of paddle " << it->first << std::endl;
                 if (vel.y < 0){
                     vel.y = -vel.y;
+                    boop();
                 }
                 pos.y = paddle->getPos().y + (paddle->getSize().y / 2) + getRad();
             }
@@ -95,6 +102,7 @@ void Ball::tick(sf::Time delta, ENTITY_MAP& others, sf::Vector2u window_size){
                 std::cout << "Hit right of paddle " << it->first << std::endl;
                 if (vel.x < 0){
                     vel.x = -vel.x;
+                    boop();
                 }
                 pos.x = paddle->getPos().x + (paddle->getSize().x / 2) + getRad();
             }

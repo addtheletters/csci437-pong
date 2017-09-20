@@ -7,7 +7,8 @@
 class Paddle : public Entity {
 public:
     enum ContactStatus {
-        // binary flags so we know when we have contact with any of the sides
+        // usable as binary flags in case we decide it something is in contact
+        // with many sides at once
         NONE   = 0,
         LEFT   = 1,
         RIGHT  = 2,
@@ -18,12 +19,13 @@ public:
     Paddle(sf::Vector2f size, sf::Vector2f center);
     
     void draw(sf::RenderWindow&) override;
-    void tick(sf::Time delta, ENTITY_MAP& others, sf::Vector2u window_size) override;
+    void tick(sf::Time delta, ENTITY_MAP& others,
+                sf::Vector2u window_size) override;
     
     sf::Vector2f getSize();
     
-    // Attempt to move horizontally. Return false if the paddle is stopped by a wall,
-    // true if the paddle moves the entirety of the amount.
+    // Attempt to move horizontally. Return false if the paddle is
+    // stopped by a wall, true if the paddle moves the entirety of the amount.
     bool tryMoveHorizontal(float amount, sf::Vector2u window_size);
     
     // Check if given ball is touching this paddle. Return a ContactStatus.

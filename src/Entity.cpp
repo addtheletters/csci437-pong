@@ -33,3 +33,9 @@ sf::Vector2f Entity::getVel(){
 void Entity::setVel(sf::Vector2f new_velocity){
     vel = new_velocity;
 }
+
+void Entity::adjustVel(float speed_diff, float angle_diff){
+    float mag = sqrt(vel.x * vel.x + vel.y * vel.y) + speed_diff;
+    float ang = atan2(vel.y, vel.x) + angle_diff;
+    setVel(mag, ang);   
+}

@@ -6,6 +6,11 @@
 
 class Ball : public Entity {
 public:
+    // increase speedup for more ball acceleration upon bounces
+    const float BOOP_SPEEDUP = 10.0f;
+    // decrease stability for more random angle deviation
+    const float BOOP_STABILITY = 5.0f;
+    
     Ball(float radius);
     
     void draw(sf::RenderWindow&) override;
@@ -13,6 +18,9 @@ public:
     
     float getRad();
     void setRad(float new_radius);
+    
+    // Add some speed and make a random angle tweak; to be called on bounces
+    void boop();
     
 private:
     float rad;

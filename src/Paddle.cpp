@@ -18,12 +18,11 @@ void Paddle::draw(sf::RenderWindow& window){
     box.setOrigin(size.x / 2, size.y / 2);
     box.setPosition(getPos());
     window.draw(box);
-    //std::cout << "Bogus draw of paddle " << std::endl;
 }
 
-void Paddle::tick(sf::Time delta, ENTITY_MAP& others, sf::Vector2u window_size){
+void Paddle::tick(sf::Time delta, ENTITY_MAP& others,
+                  sf::Vector2u window_size){
     Entity::tick(delta, others, window_size);
-    //std::cout << "Paddle was tick'd with time " << delta.asMicroseconds() << std::endl;
 }
 
 sf::Vector2f Paddle::getSize(){
@@ -106,32 +105,4 @@ int Paddle::checkBallCollision(sf::Vector2f center, float radius){
         return closestCardinal(diff);
     }
     return contacts;
-    /*
-    float left_x = pos.x - (size.x / 2);
-    float right_x = pos.x + (size.x / 2);
-    float top_y = pos.y - (size.y / 2);
-    float bottom_y = pos.y + (size.y / 2);
-    sf::Vector2f ballpos = center;
-    
-    int contacts = ContactStatus::NONE;
-    
-    // if in an overlapping column with the ball
-    if (ballpos.x + radius > left_x && ballpos.x - radius < right_x){
-        if (ballpos.y + radius > top_y){
-            contacts |= ContactStatus::TOP;
-        }
-        if (ballpos.y - radius < bottom_y){
-            contacts |= ContactStatus::BOTTOM;
-        }
-    }
-    
-    if (ballpos.y + radius > top_y && ballpos.y - radius < bottom_y){
-        if (ballpos.x + radius > left_x){
-            contacts |= ContactStatus::LEFT;
-        }
-        if (ballpos.x - radius < right_x){
-            contacts |= ContactStatus::RIGHT;
-        }
-    }
-    return contacts;*/
 }

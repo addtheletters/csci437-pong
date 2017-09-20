@@ -20,7 +20,6 @@ int main(int argc, char** argv) {
     // constants
     sf::Color background(30, 100, 240);
     const float PADDLE_MOVE_SPEED = 500.0f;
-    const float BOUNCE_RANDOMNESS = 0.1f;
     
     // seed RNG
     std::srand(1234);
@@ -42,6 +41,7 @@ int main(int argc, char** argv) {
     // add entities
     entities["ball"]  = std::unique_ptr<Entity>(new Ball(20));
     entities["ball"]->setPos(sf::Vector2f(100,100));
+    entities["ball"]->setVel(sf::Vector2f(200, 100));
     entities["p1"]    = std::unique_ptr<Entity>(
         new Paddle(sf::Vector2f(100, 30), sf::Vector2f(400, 550)));
     entities["p2"]    = std::unique_ptr<Entity>(
@@ -63,8 +63,7 @@ int main(int argc, char** argv) {
                 App.close();
             
             if(Event.type == sf::Event::KeyPressed && Event.key.code == sf::Keyboard::W){
-                std::cout << "Boop." << std::endl;
-                entities["ball"]->setVel(std::rand() % 1000, 2 * 3.1415 * (double)(std::rand() % 360) / 360);
+                dynamic_cast<Ball*>(entities["ball"].get())->boop();
             }
         }
         
@@ -116,7 +115,6 @@ int main(int argc, char** argv) {
         /*std::cout << "elapsed time "<< last_frame.asSeconds() 
         << ", delta time: " << delta.asMicroseconds() << std::endl;*/
         for (auto it = entities.begin(); it != entities.end(); it++) {
-            //std::cout << "Updating " << it->first << std::endl;
             it->second->tick(delta, entities, App.getSize());
         }
         
