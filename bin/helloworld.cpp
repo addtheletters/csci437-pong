@@ -20,6 +20,7 @@ int main(int argc, char** argv) {
     // constants
     sf::Color background(30, 100, 240);
     const float PADDLE_MOVE_SPEED = 500.0f;
+    const float PADDLE_MOVE_ACCEL = 50.0f;
     const float PADDLE_HEIGHT = 100.0f;
     const float PADDLE_THICKNESS = 30.0f;
     const float BALL_START_SPEED = 300.0f;
@@ -84,6 +85,8 @@ int main(int argc, char** argv) {
         if (up_pressed){
             human_move_multiplier -= 1;
         }
+        Paddle* p1 = getPaddle(entities, "p1");
+        // TODO gradual movement
         getPaddle(entities, "p1")->setVel(
             sf::Vector2f(0, human_move_multiplier * PADDLE_MOVE_SPEED));
     

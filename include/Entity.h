@@ -11,6 +11,8 @@
 #include <string>
 #include <SFML/Graphics.hpp>
 
+// This class represents all displayed objects present in gameplay,
+// capable of moving, and interacting with other entities.
 class Entity {
     
 friend class Paddle;

@@ -38,22 +38,29 @@ sf::Vector2f Paddle::getSize(){
     return size;
 }
 
+// Math utility. Enforces bounds on val.
 float clamp(float val, float cmin, float cmax){
     return std::max(cmin, std::min(cmax, val));
 }
 
+// Math utility. Returns a dot product of vectors a and b.
 float dotProd(sf::Vector2f a, sf::Vector2f b){
     return a.x * b.x + a.y * b.y;
 }
 
+// Math utility. Returns the magnitude of vec.
 float length(sf::Vector2f vec){
     return sqrt(dotProd(vec, vec));
 }
 
+// Math utility. Enforces bounds (defined by vectors min and max)
+// on elements of vector val.
 sf::Vector2f clampVec2(sf::Vector2f val, sf::Vector2f min, sf::Vector2f max){
     return sf::Vector2f(clamp(val.x, min.x, max.x), clamp(val.y, min.y, max.y));
 }
 
+// Vector utility. Determines the closest axial / cardinal direction to a direction
+// vector, and returns a corresponding ContactStatus for that rectangle side.
 Paddle::ContactStatus closestCardinal(sf::Vector2f dir){
     sf::Vector2f cardinals[] = {
         sf::Vector2f(0, 1),

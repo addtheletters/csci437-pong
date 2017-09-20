@@ -1,6 +1,7 @@
 #include "Ball.h"
 
 #include <cstdlib>
+#include <cmath>
 #include <iostream>
 #include <string>
 #include <memory>
@@ -62,13 +63,13 @@ void Ball::tick(sf::Time delta, ENTITY_MAP& others, sf::Vector2u window_size){
     if (pos.y + rad > window_size.y){
         pos.y = window_size.y - rad;
         vel.y = -vel.y;
-        //boop();
+        boop();
     }
     // top wall
     if (pos.y - rad < 0){
         pos.y = rad;
         vel.y = -vel.y;
-        //boop();
+        boop();
     }
     
     // handle collisions with other entities
@@ -98,7 +99,7 @@ void Ball::tick(sf::Time delta, ENTITY_MAP& others, sf::Vector2u window_size){
                 }
                 pos.x = paddle->getPos().x - (paddle->getSize().x / 2) - getRad();
                 // add some paddle velocity to the ball
-                vel.y = vel.y * (1.0-SPEED_INHERITANCE) + (SPEED_INHERITANCE * paddle->getVel().y);
+                vel.y += (SPEED_INHERITANCE * paddle->getVel().y);
             }
             if (hits & Paddle::ContactStatus::BOTTOM){
                 //std::cout << "Hit bottom of paddle " << it->first << std::endl;
@@ -118,7 +119,7 @@ void Ball::tick(sf::Time delta, ENTITY_MAP& others, sf::Vector2u window_size){
                 }
                 pos.x = paddle->getPos().x + (paddle->getSize().x / 2) + getRad();
                 // add some paddle velocity to the ball
-                vel.y = vel.y * (1.0-SPEED_INHERITANCE) + (SPEED_INHERITANCE * paddle->getVel().y);
+                vel.y += (SPEED_INHERITANCE * paddle->getVel().y);
             }
         }
     }

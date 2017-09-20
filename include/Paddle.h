@@ -4,11 +4,17 @@
 #include <SFML/Graphics.hpp>
 #include "Entity.h"
 
+// This class represents rectangular objects with which the ball may collide.
+// It handles detection of collisions with circular objects, but not resolution
+// of those collisions.
+// Its rectangle is centered on its' entity position.
 class Paddle : public Entity {
 public:
+    // Enumerates possible sides of this paddle that may contact something 
+    // that is colliding with it.
     enum ContactStatus {
-        // usable as binary flags in case we decide it something is in contact
-        // with many sides at once
+        // The values are usable as binary flags in case we decide 
+        // is in contact with many sides at once.
         NONE   = 0,
         LEFT   = 1,
         RIGHT  = 2,
@@ -22,13 +28,15 @@ public:
     void tick(sf::Time delta, ENTITY_MAP& others,
                 sf::Vector2u window_size) override;
     
+    // Returns the dimensions of this object's rectangular shape.
     sf::Vector2f getSize();
     
     // Attempt to move vertical. Return false if the paddle is stopped by
     // a window border, true if the paddle moves the entirety of the amount.
     bool tryMoveVertical(float amount, sf::Vector2u window_size);
     
-    // Check if given ball is touching this paddle. Return a ContactStatus.
+    // Check if a circle is intersecting this paddle. Return a ContactStatus,
+    // or potentially several as binary flags combined into an int. 
     int checkBallCollision(sf::Vector2f center, float radius);
     
 private:
