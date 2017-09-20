@@ -38,8 +38,9 @@ int main(int argc, char** argv) {
     const float PADDLE_MOVE_SPEED_MAX = 1000.0f;
     const float PADDLE_MOVE_SPEED_BASE = 200.0f;
     const float PADDLE_MOVE_ACCEL = 1500.0f;
-    const float PADDLE_HEIGHT = 100.0f;
-    const float PADDLE_THICKNESS = 30.0f;
+    const float PADDLE_HEIGHT = 120.0f;
+    const float PADDLE_THICKNESS = 20.0f;
+    const float PADDLE_BACK_DISTANCE = 30.0f;
     const float BALL_START_SPEED = 300.0f;
     
     // seed RNG
@@ -68,9 +69,11 @@ int main(int argc, char** argv) {
     entities["ball"]->setVel(sf::Vector2f(start_x_vel, start_y_vel));
     
     entities["p1"]    = std::unique_ptr<Entity>(
-        new Paddle(sf::Vector2f(PADDLE_THICKNESS, PADDLE_HEIGHT), sf::Vector2f(50, 300)));
+        new Paddle(sf::Vector2f(PADDLE_THICKNESS, PADDLE_HEIGHT),
+                   sf::Vector2f(PADDLE_BACK_DISTANCE, App.getSize().y / 2)));
     entities["p2"]    = std::unique_ptr<Entity>(
-        new Paddle(sf::Vector2f(PADDLE_THICKNESS, PADDLE_HEIGHT), sf::Vector2f(750, 300)));
+        new Paddle(sf::Vector2f(PADDLE_THICKNESS, PADDLE_HEIGHT), 
+                   sf::Vector2f(App.getSize().x - PADDLE_BACK_DISTANCE, App.getSize().y / 2)));
     
     // start main loop
     while (App.isOpen()) {

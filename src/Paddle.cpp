@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include "Ball.h"
+#include "VectorUtility.h"
 
 
 Paddle::Paddle(sf::Vector2f size, sf::Vector2f center){
@@ -38,28 +39,7 @@ sf::Vector2f Paddle::getSize(){
     return size;
 }
 
-// Math utility. Enforces bounds on val.
-float clamp(float val, float cmin, float cmax){
-    return std::max(cmin, std::min(cmax, val));
-}
-
-// Math utility. Returns a dot product of vectors a and b.
-float dotProd(sf::Vector2f a, sf::Vector2f b){
-    return a.x * b.x + a.y * b.y;
-}
-
-// Math utility. Returns the magnitude of vec.
-float length(sf::Vector2f vec){
-    return sqrt(dotProd(vec, vec));
-}
-
-// Math utility. Enforces bounds (defined by vectors min and max)
-// on elements of vector val.
-sf::Vector2f clampVec2(sf::Vector2f val, sf::Vector2f min, sf::Vector2f max){
-    return sf::Vector2f(clamp(val.x, min.x, max.x), clamp(val.y, min.y, max.y));
-}
-
-// Vector utility. Determines the closest axial / cardinal direction to a direction
+// Determines the closest axial / cardinal direction to a direction
 // vector, and returns a corresponding ContactStatus for that rectangle side.
 Paddle::ContactStatus closestCardinal(sf::Vector2f dir){
     sf::Vector2f cardinals[] = {
@@ -70,14 +50,14 @@ Paddle::ContactStatus closestCardinal(sf::Vector2f dir){
     };
     float max = 0;
     int best = 0;
-    sf::Vector2f normalized = dir / length(dir);
+    sf::Vector2f normalized = VecUtil::normalize(dir);
     
     std::cout << "norm x " << normalized.x << std::endl;
     std::cout << "norm y " << normalized.y << std::endl;
-    std::cout << "confirmed len " << dotProd(normalized, normalized) << std::endl;
+    std::cout << "confirmed len " << VecUtil::dotProd(normalized, normalized) << std::endl;
     
     for (int i = 0; i < 4; i++){
-        float dp = dotProd(normalized, cardinals[i]);
+        float dp = VecUtil::dotProd(normalized, cardinals[i]);
         if (dp > max){
             max = dp;
             best = i;
@@ -100,10 +80,10 @@ Paddle::ContactStatus closestCardinal(sf::Vector2f dir){
 int Paddle::checkBallCollision(sf::Vector2f center, float radius){
     sf::Vector2f half_size = size * 0.5f;
     sf::Vector2f diff = center - pos;
-    sf::Vector2f closest = pos + clampVec2(diff, -half_size, half_size);
+    sf::Vector2f closest = pos + VecUtil::clampVec2(diff, -half_size, half_size);
     diff = closest - center;
     int contacts = ContactStatus::NONE;
-    if (dotProd(diff, diff) <= radius * radius) {
+    if (VecUtil::dotProd(diff, diff) <= radius * radius) {
         return closestCardinal(diff);
     }
     return contacts;

@@ -46,9 +46,6 @@ public:
         setVel(sf::Vector2f(speed * cos(angle), speed * sin(angle)));
     };
     
-    // Add 
-    void addVel(sf::Vector2f);
-    
     // Get the speed (magnitude of velocity vector).
     float getSpeed(){
         return sqrt(vel.x * vel.x + vel.y * vel.y);
