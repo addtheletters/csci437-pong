@@ -7,9 +7,12 @@
 class Ball : public Entity {
 public:
     // increase speedup for more ball acceleration upon bounces
-    const float BOOP_SPEEDUP = 10.0f;
+    const float BOOP_SPEEDUP = 1.0f;
     // decrease stability for more random angle deviation
-    const float BOOP_STABILITY = 5.0f;
+    const float BOOP_STABILITY = 1.0f;
+    
+    // fraction of a paddle's velocity that gets added to the ball's upon hit
+    const float SPEED_INHERITANCE = 0.2f;
     
     Ball(float radius);
     

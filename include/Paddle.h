@@ -24,9 +24,9 @@ public:
     
     sf::Vector2f getSize();
     
-    // Attempt to move horizontally. Return false if the paddle is
-    // stopped by a wall, true if the paddle moves the entirety of the amount.
-    bool tryMoveHorizontal(float amount, sf::Vector2u window_size);
+    // Attempt to move vertical. Return false if the paddle is stopped by
+    // a window border, true if the paddle moves the entirety of the amount.
+    bool tryMoveVertical(float amount, sf::Vector2u window_size);
     
     // Check if given ball is touching this paddle. Return a ContactStatus.
     int checkBallCollision(sf::Vector2f center, float radius);

@@ -8,20 +8,20 @@ AutoPlayer::Action AutoPlayer::getAIAction(sf::Vector2u window_size,
                         sf::Vector2f paddle_pos,
                         float away,
                         float laziness){
-    float target_x = ball_pos.x;
+    float target_y = ball_pos.y;
     // if the ball is moving away, move to a more central reset position
-    if ((away > 0) == (ball_vel.y > 0)){
-        target_x = (ball_pos.x + (window_size.x / 2)) / 2.0f;
+    if ((away > 0) == (ball_vel.x > 0)){
+        target_y = (ball_pos.y + (window_size.y / 2)) / 2.0f;
     }
-    float diff = target_x - paddle_pos.x;
+    float diff = target_y - paddle_pos.y;
     float diff_abs = abs(diff);
     if (diff_abs < laziness) {
         return AutoPlayer::Action::NONE;
     }
     if (diff > 0) {
-        return AutoPlayer::Action::MOVE_RIGHT;
+        return AutoPlayer::Action::MOVE_DOWN;
     }
     else{
-        return AutoPlayer::Action::MOVE_LEFT;
+        return AutoPlayer::Action::MOVE_UP;
     }
 }

@@ -20,9 +20,12 @@ int main(int argc, char** argv) {
     // constants
     sf::Color background(30, 100, 240);
     const float PADDLE_MOVE_SPEED = 500.0f;
+    const float PADDLE_HEIGHT = 100.0f;
+    const float PADDLE_THICKNESS = 30.0f;
+    const float BALL_START_SPEED = 300.0f;
     
     // seed RNG
-    std::srand(1234);
+    std::srand(14315);
     
     // create main window
     sf::RenderWindow App(sf::VideoMode(800,600,32), "Ben Zhang's Pong - SFML");
@@ -40,12 +43,16 @@ int main(int argc, char** argv) {
     
     // add entities
     entities["ball"]  = std::unique_ptr<Entity>(new Ball(20));
-    entities["ball"]->setPos(sf::Vector2f(100,100));
-    entities["ball"]->setVel(sf::Vector2f(200, 100));
+    entities["ball"]->setPos(sf::Vector2f(App.getSize().x / 2, App.getSize().y / 2));
+    
+    float start_y_vel = ((std::rand() % 7) - 3.5) * BALL_START_SPEED;
+    float start_x_vel = ((std::rand() % 2) * 2 - 1) * BALL_START_SPEED;
+    entities["ball"]->setVel(sf::Vector2f(start_x_vel, start_y_vel));
+    
     entities["p1"]    = std::unique_ptr<Entity>(
-        new Paddle(sf::Vector2f(100, 30), sf::Vector2f(400, 550)));
+        new Paddle(sf::Vector2f(PADDLE_THICKNESS, PADDLE_HEIGHT), sf::Vector2f(50, 300)));
     entities["p2"]    = std::unique_ptr<Entity>(
-        new Paddle(sf::Vector2f(100, 30), sf::Vector2f(400, 50)));
+        new Paddle(sf::Vector2f(PADDLE_THICKNESS, PADDLE_HEIGHT), sf::Vector2f(750, 300)));
     
     // start main loop
     while (App.isOpen()) {
@@ -69,47 +76,31 @@ int main(int argc, char** argv) {
         
         // read non-event input
         // move player paddle horizontally
-        bool left_pressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Left);
-        bool right_pressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Right);
-        if (left_pressed || right_pressed){
-            float multiplier = 0;
-            if (right_pressed)
-                multiplier += 1;
-            if (left_pressed){
-                multiplier -= 1;
-            }
-            if (getPaddle(entities, "p1")->tryMoveHorizontal(
-                multiplier * delta.asSeconds() * PADDLE_MOVE_SPEED, App.getSize())){
-                //std::cout << "Paddle moved." << std::endl;
-            }
-            else{
-                //std::cout << "Paddle hit a wall." << std::endl;
-            }
+        bool up_pressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Up);
+        bool down_pressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Down);
+        float human_move_multiplier = 0;
+        if (down_pressed)
+            human_move_multiplier += 1;
+        if (up_pressed){
+            human_move_multiplier -= 1;
         }
-        
+        getPaddle(entities, "p1")->setVel(
+            sf::Vector2f(0, human_move_multiplier * PADDLE_MOVE_SPEED));
+    
         // move AI-controlled paddle horizontally
-        AutoPlayer::Action ai_action = 
-            ai->getAIAction(App.getSize(), 
-                            entities["ball"]->getPos(), 
-                            entities["ball"]->getVel(), 
-                            entities["p2"]->getPos(),
-                            1.0f,
-                            5.0f
-                           );
-        if (ai_action != AutoPlayer::Action::NONE){
-            float multiplier = 0;
-            if (ai_action == AutoPlayer::Action::MOVE_RIGHT)
-                multiplier = 1;
-            if (ai_action == AutoPlayer::Action::MOVE_LEFT)
-                multiplier = -1;
-            if (getPaddle(entities, "p2")->tryMoveHorizontal(
-                multiplier * delta.asSeconds() * PADDLE_MOVE_SPEED, App.getSize())){
-                //std::cout << "Paddle moved." << std::endl;
-            }
-            else{
-                //std::cout << "Paddle hit a wall." << std::endl;
-            }
-        }
+        AutoPlayer::Action ai_action = ai->getAIAction(App.getSize(), 
+                                                        entities["ball"]->getPos(), 
+                                                        entities["ball"]->getVel(), 
+                                                        entities["p2"]->getPos(),
+                                                        -1.f,
+                                                        5.0f);
+        float ai_move_multiplier = 0;
+        if (ai_action == AutoPlayer::Action::MOVE_DOWN)
+            ai_move_multiplier = 1;
+        if (ai_action == AutoPlayer::Action::MOVE_UP)
+            ai_move_multiplier = -1;
+        getPaddle(entities, "p2")->setVel(
+            sf::Vector2f(0, ai_move_multiplier * PADDLE_MOVE_SPEED));
         
         // update entities
         /*std::cout << "elapsed time "<< last_frame.asSeconds() 
@@ -129,6 +120,8 @@ int main(int argc, char** argv) {
         // display
         App.display();
     }
+    
+    // clean up?
 
     // Done.
     return 0;

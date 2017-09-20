@@ -7,8 +7,8 @@ class AutoPlayer {
 public:
     enum Action {
         NONE = 0,
-        MOVE_LEFT   = 1,
-        MOVE_RIGHT  = 2,
+        MOVE_UP    = 1,
+        MOVE_DOWN  = 2,
     };
     
     // Get the action this AI actor should take, based on speed and position

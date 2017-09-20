@@ -23,24 +23,19 @@ void Paddle::draw(sf::RenderWindow& window){
 void Paddle::tick(sf::Time delta, ENTITY_MAP& others,
                   sf::Vector2u window_size){
     Entity::tick(delta, others, window_size);
+    float half_height = size.y / 2;
+    if (pos.y - half_height < 0) {
+        pos.y = half_height;
+        // thud, paddle hits top border
+    }
+    if (pos.y + half_height > window_size.y) {
+        pos.y = window_size.y - half_height;
+        // thud, paddle hits bottom border
+    }
 }
 
 sf::Vector2f Paddle::getSize(){
     return size;
-}
-
-bool Paddle::tryMoveHorizontal(float amount, sf::Vector2u window_size){
-    pos.x += amount;
-    float half_width = size.x / 2;
-    if (pos.x - half_width < 0) {
-        pos.x = half_width;
-        return false;
-    }
-    if (pos.x + half_width > window_size.x) {
-        pos.x = window_size.x - half_width;
-        return false;
-    }
-    return true;
 }
 
 float clamp(float val, float cmin, float cmax){
