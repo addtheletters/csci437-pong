@@ -40,7 +40,9 @@ public:
     int checkBallCollision(sf::Vector2f center, float radius);
     
 private:
-    sf::Vector2f size;
+    sf::Vector2f size_;
+    
+    ContactStatus closestCardinal(sf::Vector2f);
 };
 
 #endif // PADDLE_H

@@ -10,13 +10,13 @@
 #include "Ball.h"
 #include "Paddle.h"
 #include "AutoPlayer.h"
+#include "VectorUtility.h"
 
 Paddle* getPaddle(ENTITY_MAP& entities, std::string id){
     return dynamic_cast<Paddle*>(entities[id].get());
 }
 
 void applyPaddleInput(Paddle* paddle, float multiplier, sf::Time delta){
-    std::cout << "mult " << multiplier << std::endl;
     if (multiplier == 0){
         paddle->setVel(sf::Vector2f(0,0));
         return;
@@ -26,8 +26,9 @@ void applyPaddleInput(Paddle* paddle, float multiplier, sf::Time delta){
         paddle->setVel(sf::Vector2f(0, 200.0f * multiplier));
     }
     
-    float new_paddle_vy = std::max(-1000.0f, std::min(1000.0f, paddle->getVel().y + multiplier * delta.asSeconds() * 1500.0f));
     // apply acceleration
+    float new_paddle_vy = vecutil::clamp(paddle->getVel().y + multiplier * delta.asSeconds() * 1500.0f, 
+                                         -1000.0f, 1000.0f);
     paddle->setVel(sf::Vector2f(0, new_paddle_vy));
 }
 
@@ -140,8 +141,6 @@ int main(int argc, char** argv) {
         App.display();
     }
     
-    // clean up?
-
     // Done.
     return 0;
 }

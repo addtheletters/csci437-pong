@@ -1,8 +1,16 @@
 #include "Entity.h"
 
+#include <iostream>
+
+#include "VectorUtility.h"
+
 Entity::Entity(){
-    pos = sf::Vector2f(0, 0);
-    vel = sf::Vector2f(0, 0);
+    pos_ = sf::Vector2f(0, 0);
+    vel_ = sf::Vector2f(0, 0);
+}
+
+Entity::~Entity(){
+    std::cout << "~Entity" << std::endl;
 }
 
 void Entity::draw(sf::RenderWindow& window) {
@@ -15,27 +23,27 @@ void Entity::tick(sf::Time delta, ENTITY_MAP& others, sf::Vector2u window_size){
 }
 
 sf::Vector2f Entity::getPos(){
-    return pos;
+    return pos_;
 }
 
-void Entity::setPos(sf::Vector2f new_position){
-    pos = new_position;
+void Entity::setPos(sf::Vector2f pos){
+    pos_ = pos;
 }
 
 void Entity::move(sf::Vector2f displacement){
-    pos = pos + displacement;
+    pos_ = pos_ + displacement;
 }
 
 sf::Vector2f Entity::getVel(){
-    return vel;
+    return vel_;
 }
 
-void Entity::setVel(sf::Vector2f new_velocity){
-    vel = new_velocity;
+void Entity::setVel(sf::Vector2f vel){
+    vel_ = vel;
 }
 
 void Entity::adjustVel(float speed_diff, float angle_diff){
-    float mag = sqrt(vel.x * vel.x + vel.y * vel.y) + speed_diff;
-    float ang = atan2(vel.y, vel.x) + angle_diff;
-    setVel(mag, ang);   
+    float mag = sqrt(vel_.x * vel_.x + vel_.y * vel_.y) + speed_diff;
+    float ang = atan2(vel_.y, vel_.x) + angle_diff;
+    setVel(vecutil::fromPolar(mag, ang));   
 }

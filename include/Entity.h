@@ -19,6 +19,8 @@ friend class Paddle;
 friend class Ball;
     
 public:
+    Entity();
+    ~Entity();
     
     // Draw the entity in SFML graphics
     virtual void draw(sf::RenderWindow&);
@@ -38,32 +40,15 @@ public:
     // Get the current velocity
     sf::Vector2f getVel();
     
-    // Set the velocity vector directly
+    // Set the current velocity
     void setVel(sf::Vector2f new_velocity);
-    
-    // Set the velocity using a speed and direction (angle in radians)
-    void setVel(float speed, float angle){
-        setVel(sf::Vector2f(speed * cos(angle), speed * sin(angle)));
-    };
-    
-    // Get the speed (magnitude of velocity vector).
-    float getSpeed(){
-        return sqrt(vel.x * vel.x + vel.y * vel.y);
-    };
-    
-    // Get the angle of the velocity vector.
-    float getAngle(){
-        return atan2(vel.y, vel.x);
-    };
     
     // Change the velocity's speed and angle
     void adjustVel(float speed_diff, float angle_diff);
     
 private:
-    Entity();
-    
-    sf::Vector2f pos;
-    sf::Vector2f vel;
+    sf::Vector2f pos_;
+    sf::Vector2f vel_;
 };
 
 #endif // ENTITY_H
