@@ -24,6 +24,8 @@ public:
     
     // Returns the ball's radius.
     float getRad();
+    
+    // Set the ball's radius.
     void setRad(float rad);
     
     // Add some speed and make a random angle tweak; to be called on bounces

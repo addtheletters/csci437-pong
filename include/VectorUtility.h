@@ -18,7 +18,7 @@ float dotProd(sf::Vector2f, sf::Vector2f);
 // Returns the magnitude of the vector.
 float length(sf::Vector2f);
 
-// Returns the polar angle of this vector direction.
+// Returns the polar angle of this vector's direction.
 // Can return nan or other error-y values for vectors whose angle is uncertain,
 // such as zero.
 float angle(sf::Vector2f);
@@ -32,4 +32,4 @@ sf::Vector2f fromPolar(float length, float angle);
 
 }
 
-#endif
+#endif // VECUTIL_H

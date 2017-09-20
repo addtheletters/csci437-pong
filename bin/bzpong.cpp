@@ -1,5 +1,5 @@
 //
-//
+//  TODO write some description here
 //
 
 #include <memory>
@@ -54,10 +54,8 @@ void resetEntities(ENTITY_MAP& entities, sf::Vector2u window_size){
     // set up ball
     entities["ball"]  = std::unique_ptr<Entity>(
         new Ball(20, sf::Vector2f(window_size.x / 2, window_size.y / 2)));
-    // ball always starts heading towards the computer
+    // ball always starts heading towards the AI-paddle
     float ball_start_angle = BALL_START_ANGLE_RANGE * (((std::rand() % 1000) / 1000.0) - 0.5);
-    //float start_y_vel = ((std::rand() % 7) - 3.5) * BALL_START_SPEED;
-    //float start_x_vel = ((std::rand() % 2) * 2 - 1) * BALL_START_SPEED;
     entities["ball"]->setVel(vecutil::fromPolar(BALL_START_SPEED, ball_start_angle));
     
     // set up paddles
@@ -69,12 +67,18 @@ void resetEntities(ENTITY_MAP& entities, sf::Vector2u window_size){
                    sf::Vector2f(window_size.x - PADDLE_BACK_DISTANCE,
                                 window_size.y / 2)));
 }
-    
+
+void resetGame(int& score1, int& score2, ENTITY_MAP& entities, sf::Vector2u window_size){
+    score1 = 0;
+    score2 = 0;
+    resetEntities(entities, window_size);
+}
+
 } // namespace
 
 int main(int argc, char** argv) {
     
-    // seed RNG
+    // seed the RNG
     std::srand(14315);
     
     // create main window
@@ -85,9 +89,13 @@ int main(int argc, char** argv) {
     sf::Time last_frame;
     sf::Time delta;
     
-    // track score
-    int p1_score;
-    int p2_score;
+    // flag indicating someone has scored;
+    // nonzero during loop iterations when someone has scored
+    int scorer = 0;
+    
+    // cumulative score trackers
+    int p1_score = 0;
+    int p2_score = 0;
     
     // create AI controller
     std::unique_ptr<AutoPlayer> ai(new AutoPlayer(-1.0f, 2.0f));
@@ -117,14 +125,39 @@ int main(int argc, char** argv) {
             
                 // Spacebar resets
                 if (Event.key.code == sf::Keyboard::Space) {
-                    resetEntities(entities, App.getSize());
+                    resetGame(p1_score, p2_score, entities, App.getSize());
                 }
                 
                 // W nudges the ball slightly
-                if(Event.key.code == sf::Keyboard::W){
+                if (Event.key.code == sf::Keyboard::W){
                     dynamic_cast<Ball*>(entities["ball"].get())->boop();
                 }
+                
+                // TODO remove this temp testing stuff
+                if (Event.key.code == sf::Keyboard::Num1){
+                    scorer = 1;
+                }
+                if (Event.key.code == sf::Keyboard::Num2){
+                    scorer = 2;
+                }
             }
+        }
+        
+        // check if anyone has scored
+        if (scorer != 0){
+            switch (scorer){
+                case 1:
+                    p1_score++;
+                    break;
+                case 2:
+                    p2_score++;
+                    break;
+                default:
+                    break;
+            }
+            std::cout << "Player " << scorer << " scored." << std::endl;
+            resetEntities(entities, App.getSize());
+            scorer = 0;
         }
         
         // read non-event input
