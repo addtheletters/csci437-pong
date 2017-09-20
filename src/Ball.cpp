@@ -1,5 +1,10 @@
-#include <iostream>
 #include "Ball.h"
+
+#include <iostream>
+#include <string>
+#include <memory>
+
+#include "Paddle.h"
 
 Ball::Ball(float radius){
     rad = radius;
@@ -50,6 +55,52 @@ void Ball::tick(sf::Time delta, ENTITY_MAP& others, sf::Vector2u window_size){
         pos.y = rad;
         vel.y = -vel.y;
     }
+    
+    // handle collisions with other entities
+    for (auto it = others.begin(); it != others.end(); it++){
+        if (it->first == "ball")
+            continue;
+        if (it->first == "p1" || it->first == "p2"){
+            // do bouncy bounce
+            Paddle* paddle = dynamic_cast<Paddle*>(it->second.get());
+            int hits = paddle->checkBallCollision(getPos(), getRad());
+            
+            //if ((hits & Paddle::ContactStatus::TOP) && (hits & Paddle::ContactStatus::LEFT)) {
+                // hopefully this is the topleft corner
+                
+            //}
+            
+            if (hits & Paddle::ContactStatus::TOP){
+                std::cout << "Hit top of paddle " << it->first << std::endl;
+                if (vel.y > 0){
+                    vel.y = -vel.y;
+                }
+                pos.y = paddle->getPos().y - (paddle->getSize().y / 2) - getRad();
+            }
+            if (hits & Paddle::ContactStatus::LEFT){
+                std::cout << "Hit left of paddle " << it->first << std::endl;
+                if (vel.x > 0){
+                    vel.x = -vel.x;
+                }
+                pos.x = paddle->getPos().x - (paddle->getSize().x / 2) - getRad();
+            }
+            if (hits & Paddle::ContactStatus::BOTTOM){
+                std::cout << "Hit bottom of paddle " << it->first << std::endl;
+                if (vel.y < 0){
+                    vel.y = -vel.y;
+                }
+                pos.y = paddle->getPos().y + (paddle->getSize().y / 2) + getRad();
+            }
+            if (hits & Paddle::ContactStatus::RIGHT){
+                std::cout << "Hit right of paddle " << it->first << std::endl;
+                if (vel.x < 0){
+                    vel.x = -vel.x;
+                }
+                pos.x = paddle->getPos().x + (paddle->getSize().x / 2) + getRad();
+            }
+        }
+    }
+    // paddles
     
     //std::cout << "Ball was tick'd with time " << delta.asMicroseconds() << std::endl;
 }

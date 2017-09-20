@@ -5,6 +5,7 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
+#include <cmath>
 #include <map>
 #include <memory>
 #include <string>
@@ -38,8 +39,17 @@ public:
     // Set the velocity vector directly
     void setVel(sf::Vector2f new_velocity);
     
-    // ... set the velocity angle
-    // ... set the speed. Choose a random angle if speed was 0 and changes to non-zero.
+    // Set the velocity using a speed and direction (angle in radians)
+    void setVel(float speed, float angle){
+        setVel(sf::Vector2f(speed * cos(angle), speed * sin(angle)));
+    };
+    
+    // Change the velocity's speed and angle
+    void adjustVel(float speed_diff, float angle_diff){
+        float mag = sqrt(vel.x * vel.x + vel.y + vel.y) + speed_diff;
+        float ang = atan2(vel.y, vel.x) + angle_diff;
+        setVel(mag, ang);
+    };
     
 private:
     Entity();
