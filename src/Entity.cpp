@@ -9,10 +9,6 @@ Entity::Entity(){
     vel_ = sf::Vector2f(0, 0);
 }
 
-Entity::~Entity(){
-    std::cout << "~Entity" << std::endl;
-}
-
 void Entity::draw(sf::RenderWindow& window) {
     return;
 }

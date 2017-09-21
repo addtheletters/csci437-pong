@@ -20,7 +20,6 @@ friend class Ball;
     
 public:
     Entity();
-    ~Entity();
     
     // Draw the entity in SFML graphics
     virtual void draw(sf::RenderWindow&);

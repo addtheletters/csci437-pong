@@ -115,6 +115,12 @@ private:
     // will place the center of the text at that position.
     void centerTextOrigin(sf::Text& text);
     
+    // Draws an SFML text object at the given position in the given size.
+    // If center_origin is true, the text object's origin will be
+    // set to the center of its rectangular bounds.
+    void drawText(sf::Text text, int font_size,
+                  sf::Vector2f position, bool center_origin, bool bold);
+    
     // Display a message to the middle of the play area, which 
     // fades over time while the game is unpaused.
     void showMessage(std::string message);
