@@ -18,7 +18,8 @@ public:
     // Run the game's main loop. Returns an exit code when the game stops.
     int gameLoop();
     
-    // Implementing the ScoreInterface
+    // Implmenets ScoreInterface; sets a flag to tell the game that
+    // a point has been scored.
     void playerScored(int scorer) override;
     
 private:
@@ -43,6 +44,8 @@ private:
     static const int SCORE_FONT_SIZE;
     static const int TITLE_FONT_SIZE;
     static const int CAPTION_FONT_SIZE;
+    static const int TUTORIAL_FONT_SIZE;
+    static const int CORNER_FONT_SIZE;
     
     static const std::string TITLE;
     static const std::string FONT_FILENAME;
@@ -50,7 +53,12 @@ private:
     static const sf::Color BACKGROUND;
     static const sf::Color MENU_COVER;
     
+    // either player gains this many points to win and end the game
     static const int POINTS_TO_WIN;
+    
+    // minimum and maximum values for difficulty
+    static const int DIFFICULTY_MIN;
+    static const int DIFFICULTY_MAX;
     
     // ----------------------------------
     
@@ -78,6 +86,11 @@ private:
     
     // is the game paused? are we in the menu?
     bool paused_ = true;
+    
+    // what difficulty level are we playing with? 0 is standard.
+    // Positive indicates more difficult, negative indicates less.
+    // Difficulty changes the time scale multiplier.
+    int difficulty_ = 0;
     
     // flag indicating someone has scored;
     // nonzero during loop iterations when someone has scored
@@ -109,12 +122,23 @@ private:
     void resetEntities();
     void resetScore();
     
+    // Draw the pause-screen elements, including a translucent overlay.
     void drawMenu();
+    
+    // Draw play-area text elements, including score counters and possibly
+    // a central notification message.
     void drawScore();
     
     // Return a multiplier to be applied to time delta to allow
     // pausing and slowdowns
     float getTimeScale();
+    
+    // Return the difficulty level's contribution to the time
+    // scale multiplier.
+    float getDifficultyTimeMultiplier();
+    
+    // Return a display-friendly name for the current difficulty level.
+    std::string describeDifficulty();
     
     // Attempt to move a paddle according a multiplier determined
     // from human or AI input

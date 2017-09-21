@@ -7,7 +7,8 @@
 // This class represents rectangular objects with which the ball may collide.
 // It handles detection of collisions with circular objects, but not resolution
 // of those collisions.
-// Its rectangle is centered on its' entity position.
+// It can move vertically within the window's constraints.
+// Its' rectangle is centered on its' entity position.
 class Paddle : public Entity {
 public:
     // Enumerates possible sides of this paddle that may contact something 
@@ -31,7 +32,7 @@ public:
     // Returns the dimensions of this object's rectangular shape.
     sf::Vector2f getSize();
     
-    // Attempt to move vertical. Return false if the paddle is stopped by
+    // Attempt to move vertically. Return false if the paddle is stopped by
     // a window border, true if the paddle moves the entirety of the amount.
     bool tryMoveVertical(float amount, sf::Vector2u window_size);
     

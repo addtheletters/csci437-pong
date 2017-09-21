@@ -1,6 +1,8 @@
 #include "PongGame.h"
 
 #include <iostream>
+#include <iomanip>
+#include <sstream>
 #include <SFML/Graphics.hpp>
 
 #include "Entity.h"
@@ -22,14 +24,22 @@ const float PongGame::BALL_START_ANGLE_RANGE = 1.7;
 const float PongGame::NOTIF_LIFETIME = 3.0f;
 const float PongGame::NOTIF_FADE_RATE = 1.0f;
 
-const int PongGame::SCORE_FONT_SIZE   = 40;
-const int PongGame::TITLE_FONT_SIZE   = 70;
-const int PongGame::CAPTION_FONT_SIZE = 30;
+const int PongGame::SCORE_FONT_SIZE     = 40;
+const int PongGame::TITLE_FONT_SIZE     = 70;
+const int PongGame::CAPTION_FONT_SIZE   = 30;
+const int PongGame::TUTORIAL_FONT_SIZE  = 25;
+const int PongGame::CORNER_FONT_SIZE    = 20;
+
 const std::string PongGame::TITLE         = "pong, kinda";
 const std::string PongGame::FONT_FILENAME = "../resources/Inconsolata-Regular.ttf";
+
 const sf::Color PongGame::BACKGROUND(30, 100, 240);
 const sf::Color PongGame::MENU_COVER(0, 0, 0, 100);
-const int PongGame::POINTS_TO_WIN     = 11;
+
+const int PongGame::POINTS_TO_WIN = 11;
+
+const int PongGame::DIFFICULTY_MIN = -3;
+const int PongGame::DIFFICULTY_MAX = 6;
 
 // --------------------
 
@@ -39,7 +49,8 @@ void PongGame::init() {
     
     // create main window
     window_ = std::unique_ptr<sf::RenderWindow>(
-        new sf::RenderWindow(sf::VideoMode(800,600,32), "Ben Zhang's Pong - SFML"));
+        new sf::RenderWindow(sf::VideoMode(800,600,32),
+                             "Ben Zhang's pong - SFML"));
     
     // create AI controller
     ai_ = std::unique_ptr<AutoPlayer>(new AutoPlayer(-1.0f, 2.0f));
@@ -56,6 +67,7 @@ void PongGame::init() {
 void PongGame::reset() {
     resetEntities();
     resetScore();
+    difficulty_ = 0;
     paused_ = true;
 }
 
@@ -73,7 +85,7 @@ int PongGame::gameLoop() {
                 window_->close();
             
             // Window resized
-            if (evnt.type == sf::Event::Resized) {
+            else if (evnt.type == sf::Event::Resized) {
                 std::cout << "Window resized to " << evnt.size.width 
                           << "x" << evnt.size.height << std::endl;
                 window_->setView(sf::View(
@@ -82,36 +94,51 @@ int PongGame::gameLoop() {
                 continue;
             }
             
-            if (evnt.type == sf::Event::KeyPressed) {
+            // Window lost focus / minimized
+            else if (evnt.type == sf::Event::LostFocus) {
+                std::cout << "Window lost focus." << std::endl;
+                paused_ = true;
+            }
+            
+            else if (evnt.type == sf::Event::KeyPressed) {
                 // Escape key exits as well
                 if (evnt.key.code == sf::Keyboard::Escape)
                     window_->close();
-            
-                // Spacebar resets
-                if (evnt.key.code == sf::Keyboard::Space) {
+                // R resets
+                else if (evnt.key.code == sf::Keyboard::R) {
                     reset();
                     continue;
                 }
-                
-                // P to pause
-                if (evnt.key.code == sf::Keyboard::P) {
+                // Space to start and pause
+                else if (evnt.key.code == sf::Keyboard::Space) {
                     paused_ = !paused_;
                 }
+                // Equals / Plus key to raise difficulty
+                else if (evnt.key.code == sf::Keyboard::Equal) {
+                    if (difficulty_ < DIFFICULTY_MAX){
+                       difficulty_++; 
+                    }
+                }
+                // Dash / Minus key to lower difficulty
+                else if (evnt.key.code == sf::Keyboard::Dash) {
+                    if (difficulty_ > DIFFICULTY_MIN){
+                        difficulty_--;
+                    }
+                }
                 
-                // TODO remove this temp testing stuff
+                // Here are some "cheat codes," of sorts:
                 // W nudges the ball slightly, speeding it up
                 // and tweaking its trajectory like when it bounces
-                if (evnt.key.code == sf::Keyboard::W){
+                else if (evnt.key.code == sf::Keyboard::W){
                     dynamic_cast<Ball*>(entities_["ball"].get())->boop();
                 }
-                if (evnt.key.code == sf::Keyboard::Num1){
+                // pressing 1 emulates the human player scoring a point
+                else if (evnt.key.code == sf::Keyboard::Num1){
                     scorer_ = 1;
                 }
-                if (evnt.key.code == sf::Keyboard::Num2){
+                // pressing 2 emulates the AI scoring a point
+                else if (evnt.key.code == sf::Keyboard::Num2){
                     scorer_ = 2;
-                }
-                if (evnt.key.code == sf::Keyboard::Q){
-                    std::cout << "p1 speed: " << entities_["p1"]->getVel().y << std::endl;
                 }
             }
         }
@@ -192,7 +219,7 @@ int PongGame::gameLoop() {
         // clear screen and fill with background color
         window_->clear(BACKGROUND);
         
-        // draw score counters and notification message
+        // draw score counters, difficulty, and notification message
         drawScore();
         
         // draw entities
@@ -200,7 +227,6 @@ int PongGame::gameLoop() {
             it->second->draw(*window_);
         }
         
-        // draw menu
         if (paused_) {
             drawMenu();
         }
@@ -278,30 +304,35 @@ void PongGame::drawMenu() {
     title_text.setStyle(sf::Text::Bold);
     centerTextOrigin(title_text);
     title_text.setPosition(sf::Vector2f(half_window.x,
-                                        half_window.y - 100));
+                                        half_window.y - 120));
     window_->draw(title_text);
     
+    // draw control information
     sf::Text tutorial_text("[up]/[down] to move paddle\n"
-                           "[P] to pause and unpause\n"
-                           "[space] to reset game\n"
+                           "[space] to start, pause and unpause\n"
+                           "[R] to reset game\n"
                            "[escape] to quit\n"
-                           "[+]/[-] to adjust difficulty (game speed)\n"
-                           "current difficulty is ", font_);
-    tutorial_text.setCharacterSize(CAPTION_FONT_SIZE);
+                           "[+]/[-] to adjust difficulty\n"
+                           "resizing window will reset game\n", font_);
+    tutorial_text.setCharacterSize(TUTORIAL_FONT_SIZE);
     centerTextOrigin(tutorial_text);
     tutorial_text.setPosition(sf::Vector2f(half_window.x,
-                                           half_window.y + 100));
+                                           half_window.y + 150));
     window_->draw(tutorial_text);
 }
 
 void PongGame::drawScore() {
-    sf::Vector2f half_window(window_->getSize().x / 2, window_->getSize().y / 2);
+    sf::Vector2f half_window(window_->getSize().x / 2,
+                             window_->getSize().y / 2);
     
+    // draw center line
     sf::RectangleShape divider_line(sf::Vector2f(1, window_->getSize().y));
     divider_line.setPosition(sf::Vector2f(half_window.x, 0));
     window_->draw(divider_line);
     
-    sf::Text p1_score_text(std::to_string(p1_score_), font_);
+    // draw left hand player's score
+    sf::Text p1_score_text(std::to_string(p1_score_) + "/" +
+                           std::to_string(POINTS_TO_WIN), font_);
     p1_score_text.setCharacterSize(SCORE_FONT_SIZE);
     p1_score_text.setStyle(sf::Text::Bold);
     centerTextOrigin(p1_score_text);
@@ -309,7 +340,9 @@ void PongGame::drawScore() {
                                            half_window.y));
     window_->draw(p1_score_text);
     
-    sf::Text p2_score_text(std::to_string(p2_score_), font_);
+    // draw right hand player's score
+    sf::Text p2_score_text(std::to_string(p2_score_) + "/" +
+                           std::to_string(POINTS_TO_WIN), font_);
     p2_score_text.setCharacterSize(SCORE_FONT_SIZE);
     p2_score_text.setStyle(sf::Text::Bold);
     centerTextOrigin(p2_score_text);
@@ -317,6 +350,7 @@ void PongGame::drawScore() {
                                            half_window.y));
     window_->draw(p2_score_text);
     
+    // draw central notification message, fade if lifetime expired
     if (notification_life_ > 0){
         notification_life_ -= getTimeScale();
     }
@@ -330,12 +364,50 @@ void PongGame::drawScore() {
     notif_text.setCharacterSize(CAPTION_FONT_SIZE);
     centerTextOrigin(notif_text);
     notif_text.setPosition(sf::Vector2f(half_window.x, half_window.y - 50));
-    notif_text.setFillColor(sf::Color(255,255,255,(int)(255 * notification_opacity_)));
+    notif_text.setFillColor(
+        sf::Color(255,255,255,(int)(255 * notification_opacity_)));
     window_->draw(notif_text);
+    
+    // draw difficulty in top left
+    std::stringstream difficulty_multiplier;
+    difficulty_multiplier << std::fixed 
+                          << std::setprecision(2)
+                          << getDifficultyTimeMultiplier();
+    std::string difficulty_str = describeDifficulty() + " (game speed x" +
+                                 difficulty_multiplier.str() + ")";
+    sf::Text difficulty_text(difficulty_str, font_);
+    difficulty_text.setCharacterSize(CORNER_FONT_SIZE);
+    difficulty_text.setPosition(sf::Vector2f(10, 10));
+    window_->draw(difficulty_text);
 }
 
 float PongGame::getTimeScale() {
-    return (1 - (int)paused_) * delta_.asSeconds();
+    return (1 - (int)paused_) * delta_.asSeconds() * getDifficultyTimeMultiplier();
+}
+
+float PongGame::getDifficultyTimeMultiplier() {
+    return 1 + (0.25 * difficulty_);
+}
+
+std::string PongGame::describeDifficulty() {
+    std::string base = "normal";
+    if (difficulty_ == 0){
+        return base;
+    }
+    else if (difficulty_ < 0) {
+        base = "easy";
+        for (int i = difficulty_ + 1; i != 0; i++){
+            base = base + "-";
+        }
+        return base;
+    }
+    else if (difficulty_ > 0) {
+        base = "hard";
+        for (int i = difficulty_ - 1; i != 0; i--){
+            base = base + "+";
+        }
+        return base;
+    }
 }
 
 void PongGame::applyPaddleInput(std::string paddle_id, float multiplier) {

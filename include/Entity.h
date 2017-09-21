@@ -11,7 +11,7 @@
 #include <string>
 #include <SFML/Graphics.hpp>
 
-// This class represents all displayed objects present in gameplay,
+// This class represents all displayed gameplay objects which are
 // capable of moving, and interacting with other entities.
 class Entity {
     
