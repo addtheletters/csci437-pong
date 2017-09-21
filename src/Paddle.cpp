@@ -21,7 +21,7 @@ void Paddle::draw(sf::RenderWindow& window){
     window.draw(box);
 }
 
-void Paddle::tick(sf::Time delta, ENTITY_MAP& others,
+void Paddle::tick(float delta, ENTITY_MAP& others,
                   sf::Vector2u window_size){
     Entity::tick(delta, others, window_size);
     float half_height = size_.y / 2;

@@ -21,7 +21,7 @@ public:
     Ball(float radius, sf::Vector2f center, ScoreInterface* score_notify);
     
     void draw(sf::RenderWindow&) override;
-    void tick(sf::Time delta, ENTITY_MAP& others,
+    void tick(float delta, ENTITY_MAP& others,
               sf::Vector2u window_size) override;
     
     // Returns the ball's radius.

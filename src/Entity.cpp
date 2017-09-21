@@ -17,8 +17,8 @@ void Entity::draw(sf::RenderWindow& window) {
     return;
 }
 
-void Entity::tick(sf::Time delta, ENTITY_MAP& others, sf::Vector2u window_size){
-    move(getVel() * delta.asSeconds());
+void Entity::tick(float delta, ENTITY_MAP& others, sf::Vector2u window_size){
+    move(getVel() * delta);
     return;
 }
 

@@ -15,15 +15,21 @@ const float PongGame::PADDLE_MOVE_ACCEL      = 2000.0f;
 const float PongGame::PADDLE_HEIGHT          = 120.0f;
 const float PongGame::PADDLE_THICKNESS       = 20.0f;
 const float PongGame::PADDLE_BACK_DISTANCE   = 30.0f;
+
 const float PongGame::BALL_START_SPEED       = 300.0f;
 const float PongGame::BALL_START_ANGLE_RANGE = 1.7;
+
+const float PongGame::NOTIF_LIFETIME = 3.0f;
+const float PongGame::NOTIF_FADE_RATE = 1.0f;
+
 const int PongGame::SCORE_FONT_SIZE   = 40;
 const int PongGame::TITLE_FONT_SIZE   = 70;
 const int PongGame::CAPTION_FONT_SIZE = 30;
-const int PongGame::POINTS_TO_WIN     = 11;
-const std::string PongGame::TITLE = "pong, kinda";
-const std::string PongGame::FONT_FILENAME    = "../resources/Inconsolata-Regular.ttf";
+const std::string PongGame::TITLE         = "pong, kinda";
+const std::string PongGame::FONT_FILENAME = "../resources/Inconsolata-Regular.ttf";
 const sf::Color PongGame::BACKGROUND(30, 100, 240);
+const sf::Color PongGame::MENU_COVER(0, 0, 0, 100);
+const int PongGame::POINTS_TO_WIN     = 11;
 
 // --------------------
 
@@ -44,14 +50,13 @@ void PongGame::init() {
                   << " in the same directory as the executable?" << std::endl;
     }
     
-    // TODO set up certain dynamic text elements
-    
     reset();
 }
 
 void PongGame::reset() {
     resetEntities();
     resetScore();
+    paused_ = true;
 }
 
 int PongGame::gameLoop() {
@@ -67,6 +72,16 @@ int PongGame::gameLoop() {
             if (evnt.type == sf::Event::Closed)
                 window_->close();
             
+            // Window resized
+            if (evnt.type == sf::Event::Resized) {
+                std::cout << "Window resized to " << evnt.size.width 
+                          << "x" << evnt.size.height << std::endl;
+                window_->setView(sf::View(
+                    sf::FloatRect(0, 0, evnt.size.width, evnt.size.height)));
+                reset();
+                continue;
+            }
+            
             if (evnt.type == sf::Event::KeyPressed) {
                 // Escape key exits as well
                 if (evnt.key.code == sf::Keyboard::Escape)
@@ -75,6 +90,12 @@ int PongGame::gameLoop() {
                 // Spacebar resets
                 if (evnt.key.code == sf::Keyboard::Space) {
                     reset();
+                    continue;
+                }
+                
+                // P to pause
+                if (evnt.key.code == sf::Keyboard::P) {
+                    paused_ = !paused_;
                 }
                 
                 // TODO remove this temp testing stuff
@@ -107,12 +128,18 @@ int PongGame::gameLoop() {
                 default:
                     break;
             }
+            if (scorer_ == 1) {
+                showMessage("< You score.");
+            }
+            if (scorer_ == 2) {
+                showMessage("The AI scores. >");
+            }
             std::cout << "Player " << scorer_ << " scored." << std::endl;
+            
             resetEntities();
             scorer_ = 0;
             
             std::cout << "Score: p1-" << p1_score_ << " ; p2-" << p2_score_ << std::endl;
-    
             
             // check if anyone has enough points to win
             int winner = 0;
@@ -124,8 +151,13 @@ int PongGame::gameLoop() {
             }
             if (winner){
                 std::cout << "Player " << winner << " wins!" << std::endl;
-                // TODO win stuff
-                paused_ = true;
+                reset();
+                if (winner == 1){
+                    showMessage("You win!");
+                }
+                else {
+                    showMessage("The computer wins :(");
+                }
             }
         }
         
@@ -154,13 +186,13 @@ int PongGame::gameLoop() {
         
         // update entities
         for (auto it = entities_.begin(); it != entities_.end(); it++) {
-            it->second->tick(delta_, entities_, window_->getSize());
+            it->second->tick(getTimeScale(), entities_, window_->getSize());
         }
         
         // clear screen and fill with background color
         window_->clear(BACKGROUND);
         
-        // draw score counters
+        // draw score counters and notification message
         drawScore();
         
         // draw entities
@@ -193,7 +225,9 @@ void PongGame::centerTextOrigin(sf::Text& text){
 }
 
 void PongGame::showMessage(std::string message){
-    // TODO this
+    notification_ = message;
+    notification_life_ = NOTIF_LIFETIME;
+    notification_opacity_ = 1;
 }
 
 void PongGame::resetEntities() {
@@ -225,9 +259,17 @@ void PongGame::resetScore() {
     scorer_ = 0;
     p1_score_ = 0;
     p2_score_ = 0;
+    showMessage("<- you are here");
 }
 
 void PongGame::drawMenu() {
+    // gray out play area with semitransparent covering
+    sf::RectangleShape cover;
+    cover.setPosition(0,0);
+    cover.setSize(sf::Vector2f(window_->getSize().x, window_->getSize().y));
+    cover.setFillColor(MENU_COVER);
+    window_->draw(cover);
+    
     // draw big title
     sf::Vector2f half_window(window_->getSize().x / 2, window_->getSize().y / 2);
     
@@ -237,9 +279,19 @@ void PongGame::drawMenu() {
     centerTextOrigin(title_text);
     title_text.setPosition(sf::Vector2f(half_window.x,
                                         half_window.y - 100));
-    
     window_->draw(title_text);
     
+    sf::Text tutorial_text("[up]/[down] to move paddle\n"
+                           "[P] to pause and unpause\n"
+                           "[space] to reset game\n"
+                           "[escape] to quit\n"
+                           "[+]/[-] to adjust difficulty (game speed)\n"
+                           "current difficulty is ", font_);
+    tutorial_text.setCharacterSize(CAPTION_FONT_SIZE);
+    centerTextOrigin(tutorial_text);
+    tutorial_text.setPosition(sf::Vector2f(half_window.x,
+                                           half_window.y + 100));
+    window_->draw(tutorial_text);
 }
 
 void PongGame::drawScore() {
@@ -264,6 +316,26 @@ void PongGame::drawScore() {
     p2_score_text.setPosition(sf::Vector2f(half_window.x + half_window.x/2,
                                            half_window.y));
     window_->draw(p2_score_text);
+    
+    if (notification_life_ > 0){
+        notification_life_ -= getTimeScale();
+    }
+    else{
+        notification_opacity_ -= getTimeScale() * NOTIF_FADE_RATE;
+        if (notification_opacity_ < 0){
+            notification_opacity_ = 0;
+        }
+    }
+    sf::Text notif_text(notification_, font_);
+    notif_text.setCharacterSize(CAPTION_FONT_SIZE);
+    centerTextOrigin(notif_text);
+    notif_text.setPosition(sf::Vector2f(half_window.x, half_window.y - 50));
+    notif_text.setFillColor(sf::Color(255,255,255,(int)(255 * notification_opacity_)));
+    window_->draw(notif_text);
+}
+
+float PongGame::getTimeScale() {
+    return (1 - (int)paused_) * delta_.asSeconds();
 }
 
 void PongGame::applyPaddleInput(std::string paddle_id, float multiplier) {
@@ -278,7 +350,7 @@ void PongGame::applyPaddleInput(std::string paddle_id, float multiplier) {
     }
     // apply acceleration, limited by max paddle speed
     float new_paddle_vy = vecutil::clamp(
-        paddle->getVel().y + multiplier * delta_.asSeconds() * PADDLE_MOVE_ACCEL,
+        paddle->getVel().y + multiplier * getTimeScale() * PADDLE_MOVE_ACCEL,
         -PADDLE_MOVE_SPEED_MAX, PADDLE_MOVE_SPEED_MAX);
     paddle->setVel(sf::Vector2f(0, new_paddle_vy));
 }

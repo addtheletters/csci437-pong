@@ -25,7 +25,7 @@ public:
     Paddle(sf::Vector2f size, sf::Vector2f center);
     
     void draw(sf::RenderWindow&) override;
-    void tick(sf::Time delta, ENTITY_MAP& others,
+    void tick(float delta, ENTITY_MAP& others,
                 sf::Vector2u window_size) override;
     
     // Returns the dimensions of this object's rectangular shape.

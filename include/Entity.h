@@ -26,7 +26,7 @@ public:
     virtual void draw(sf::RenderWindow&);
     
     // Update the entity's game state
-    virtual void tick(sf::Time delta, ENTITY_MAP& others, sf::Vector2u window_size);
+    virtual void tick(float delta, ENTITY_MAP& others, sf::Vector2u window_size);
     
     // Return the current position
     sf::Vector2f getPos();

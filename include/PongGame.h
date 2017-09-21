@@ -29,16 +29,28 @@ private:
     static const float PADDLE_MOVE_ACCEL;
     static const float PADDLE_HEIGHT;
     static const float PADDLE_THICKNESS;
+    // how far the paddles are from the sides they defend
     static const float PADDLE_BACK_DISTANCE;
+    
     static const float BALL_START_SPEED;
     static const float BALL_START_ANGLE_RANGE;
+    
+    // the time it takes a shown notification message to expire
+    static const float NOTIF_LIFETIME;
+    // how quickly a notification message fades after it expires
+    static const float NOTIF_FADE_RATE;
+    
     static const int SCORE_FONT_SIZE;
     static const int TITLE_FONT_SIZE;
     static const int CAPTION_FONT_SIZE;
-    static const int POINTS_TO_WIN;
+    
     static const std::string TITLE;
     static const std::string FONT_FILENAME;
+    
     static const sf::Color BACKGROUND;
+    static const sf::Color MENU_COVER;
+    
+    static const int POINTS_TO_WIN;
     
     // ----------------------------------
     
@@ -50,12 +62,12 @@ private:
     // display font
     sf::Font font_;
     
-    // "how-to-play" / paused text object
-    // "(re)start" controls
-    // this might not need on-the-fly modding either/
-    sf::Text tutorial;
-    // notification text object
-    sf::Text notification;
+    // notification message text
+    std::string notification_;
+    // how long until the notification message starts fading
+    float notification_life_ = 0;
+    // how opaque is the notification message now
+    float notification_opacity_ = 0;
     
     // clock for delta time
     sf::Clock frame_timer_;
@@ -63,9 +75,6 @@ private:
     sf::Time last_frame_;
     // time between the last and current frame
     sf::Time delta_;
-    
-    // multiplier to be applied to time delta to allow pausing and slowdowns
-    float time_scale_ = 1.0f;
     
     // is the game paused? are we in the menu?
     bool paused_ = true;
@@ -103,6 +112,12 @@ private:
     void drawMenu();
     void drawScore();
     
+    // Return a multiplier to be applied to time delta to allow
+    // pausing and slowdowns
+    float getTimeScale();
+    
+    // Attempt to move a paddle according a multiplier determined
+    // from human or AI input
     void applyPaddleInput(std::string paddle_id, float multiplier);
     
     // ------------------------
