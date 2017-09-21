@@ -2,6 +2,7 @@
 #define PONGGAME_H
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 
 #include "ScoreInterface.h"
 #include "Paddle.h"
@@ -18,9 +19,13 @@ public:
     // Run the game's main loop. Returns an exit code when the game stops.
     int gameLoop();
     
-    // Implmenets ScoreInterface; sets a flag to tell the game that
-    // a point has been scored.
+    // Implementing ScoreInterface...
+    // Set a flag to tell the game that a point has been scored;
+    // Play the miss / woosh sound effect.
     void playerScored(int scorer) override;
+    
+    // Play the ball-bounce sound effect.
+    void ballBounced() override;
     
 private:
     // --------------- Constant declarations
@@ -49,6 +54,8 @@ private:
     
     static const std::string TITLE;
     static const std::string FONT_FILENAME;
+    static const std::string BALL_SOUND_FILENAME;
+    static const std::string MISS_SOUND_FILENAME;
     
     static const sf::Color BACKGROUND;
     static const sf::Color MENU_COVER;
@@ -66,6 +73,13 @@ private:
     
     // main game window
     std::unique_ptr<sf::RenderWindow> window_;
+    
+    // sound buffer for effect made when the ball hits something
+    sf::SoundBuffer ball_sound_;
+    // sound buffer for effect made when the ball scores
+    sf::SoundBuffer miss_sound_;
+    // SFML object for playing sounds
+    sf::Sound sound_player_;
     
     // display font
     sf::Font font_;
@@ -91,6 +105,10 @@ private:
     // Positive indicates more difficult, negative indicates less.
     // Difficulty changes the time scale multiplier.
     int difficulty_ = 0;
+    
+    // whether or not an obstacle block should be added to the
+    // center of the playing field.
+    bool obstacle_ = false;
     
     // flag indicating someone has scored;
     // nonzero during loop iterations when someone has scored

@@ -32,6 +32,8 @@ void Ball::draw(sf::RenderWindow& window) {
 }
 
 void Ball::boop() {
+    score_notify_->ballBounced();
+    
     int boop_angle_index = (std::rand() % 360) - 180;
     adjustVel(BOOP_SPEEDUP, (1.0f * boop_angle_index) / (360 * BOOP_STABILITY) );
     // trend to go towards the edges
@@ -41,8 +43,6 @@ void Ball::boop() {
     else{
         vel_.x += BOOP_SPEEDUP;
     }
-    
-    std::cout << "Boop! - " << boop_angle_index << std::endl;
 }
 
 void Ball::tick(float delta, ENTITY_MAP& others, sf::Vector2u window_size){
@@ -75,50 +75,48 @@ void Ball::tick(float delta, ENTITY_MAP& others, sf::Vector2u window_size){
     for (auto it = others.begin(); it != others.end(); it++) {
         if (it->first == "ball")
             continue;
-        if (it->first == "p1" || it->first == "p2") {
-            // do bouncy bounce on paddles
+        if (it->first == "p1" || it->first == "p2" || it->first == "o1" || it->first == "o2") {
+            // do bouncy bounce on paddles and obstacles
             Paddle* paddle = dynamic_cast<Paddle*>(it->second.get());
             int hits = paddle->checkBallCollision(getPos(), getRad());
             
             if (hits & Paddle::ContactStatus::TOP) {
-                std::cout << "Hit top of paddle " << it->first << std::endl;
                 if (vel_.y > 0) {
                     vel_.y = -vel_.y;
-                    //boop();
+                    boop();
                 }
                 pos_.y = paddle->getPos().y - (paddle->getSize().y / 2) - getRad();
             }
             if (hits & Paddle::ContactStatus::LEFT) {
-                std::cout << "Hit left of paddle " << it->first 
-                          << " giving speed " << SPEED_INHERITANCE * paddle->getVel().y
-                          << std::endl;
+                //std::cout << "Hit left of paddle " << it->first 
+                //          << " giving speed " << SPEED_INHERITANCE * paddle->getVel().y
+                //          << std::endl;
                 if (vel_.x > 0) {
                     vel_.x = -vel_.x;
                     boop();
                 }
                 pos_.x = paddle->getPos().x - (paddle->getSize().x / 2) - getRad();
                 // add some paddle velocity to the ball
-                vel_.y += (SPEED_INHERITANCE * paddle->getVel().y);
+                vel_.y += SPEED_INHERITANCE * paddle->getVel().y;
             }
             if (hits & Paddle::ContactStatus::BOTTOM) {
-                std::cout << "Hit bottom of paddle " << it->first << std::endl;
                 if (vel_.y < 0) {
                     vel_.y = -vel_.y;
-                    //boop();
+                    boop();
                 }
                 pos_.y = paddle->getPos().y + (paddle->getSize().y / 2) + getRad();
             }
             if (hits & Paddle::ContactStatus::RIGHT) {
-                std::cout << "Hit right of paddle " << it->first
-                          << " giving speed " << SPEED_INHERITANCE * paddle->getVel().y
-                          << std::endl;
+                //std::cout << "Hit right of paddle " << it->first
+                //          << " giving speed " << SPEED_INHERITANCE * paddle->getVel().y
+                 //         << std::endl;
                 if (vel_.x < 0) {
                     vel_.x = -vel_.x;
                     boop();
                 }
                 pos_.x = paddle->getPos().x + (paddle->getSize().x / 2) + getRad();
                 // add some paddle velocity to the ball
-                vel_.y += (SPEED_INHERITANCE * paddle->getVel().y);
+                vel_.y += SPEED_INHERITANCE * paddle->getVel().y;
             }
         }
     }

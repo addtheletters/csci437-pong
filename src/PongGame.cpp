@@ -3,7 +3,6 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
-#include <SFML/Graphics.hpp>
 
 #include "Entity.h"
 #include "Ball.h"
@@ -21,7 +20,7 @@ const float PongGame::PADDLE_BACK_DISTANCE   = 30.0f;
 const float PongGame::BALL_START_SPEED       = 300.0f;
 const float PongGame::BALL_START_ANGLE_RANGE = 1.7;
 
-const float PongGame::NOTIF_LIFETIME = 3.0f;
+const float PongGame::NOTIF_LIFETIME = 2.0f;
 const float PongGame::NOTIF_FADE_RATE = 1.0f;
 
 const int PongGame::SCORE_FONT_SIZE     = 40;
@@ -32,6 +31,8 @@ const int PongGame::CORNER_FONT_SIZE    = 20;
 
 const std::string PongGame::TITLE         = "pong, kinda";
 const std::string PongGame::FONT_FILENAME = "../resources/Inconsolata-Regular.ttf";
+const std::string PongGame::BALL_SOUND_FILENAME = "../resources/ball.wav";
+const std::string PongGame::MISS_SOUND_FILENAME = "../resources/miss.wav";
 
 const sf::Color PongGame::BACKGROUND(30, 100, 240);
 const sf::Color PongGame::MENU_COVER(0, 0, 0, 100);
@@ -58,7 +59,18 @@ void PongGame::init() {
     // load display font
     if (!font_.loadFromFile(FONT_FILENAME)){
         std::cout << "Is " << FONT_FILENAME 
-                  << " in the same directory as the executable?" << std::endl;
+                  << " in the correct place?" << std::endl;
+    }
+    
+    // load ball sound
+    if (!ball_sound_.loadFromFile(BALL_SOUND_FILENAME)){
+        std::cout << "Is " << BALL_SOUND_FILENAME
+                  << " in the correct place?" << std::endl;
+    }
+    // load miss sound
+    if (!miss_sound_.loadFromFile(MISS_SOUND_FILENAME)){
+        std::cout << "Is " << MISS_SOUND_FILENAME
+                  << " in the correct place?" << std::endl;
     }
     
     reset();
@@ -126,27 +138,35 @@ int PongGame::gameLoop() {
                         difficulty_--;
                     }
                 }
+                // T toggles whether the center obstacle will be added
+                // when objects are reset.
+                else if (evnt.key.code == sf::Keyboard::T) {
+                    obstacle_ = !obstacle_;
+                    if (paused_) {
+                        resetEntities();
+                    }
+                }
                 
                 // Here are some "cheat codes," of sorts:
                 // W nudges the ball slightly, speeding it up
                 // and tweaking its trajectory like when it bounces
-                else if (evnt.key.code == sf::Keyboard::W){
+                else if (evnt.key.code == sf::Keyboard::W) {
                     dynamic_cast<Ball*>(entities_["ball"].get())->boop();
                 }
                 // pressing 1 emulates the human player scoring a point
-                else if (evnt.key.code == sf::Keyboard::Num1){
+                else if (evnt.key.code == sf::Keyboard::Num1) {
                     scorer_ = 1;
                 }
                 // pressing 2 emulates the AI scoring a point
-                else if (evnt.key.code == sf::Keyboard::Num2){
+                else if (evnt.key.code == sf::Keyboard::Num2) {
                     scorer_ = 2;
                 }
             }
         }
         
         // check if anyone has scored
-        if (scorer_ != 0){
-            switch (scorer_){
+        if (scorer_ != 0) {
+            switch (scorer_) {
                 case 1:
                     p1_score_++;
                     break;
@@ -174,13 +194,13 @@ int PongGame::gameLoop() {
             if (p1_score_ >= POINTS_TO_WIN) {
                 winner = 1;
             }
-            else if (p2_score_ >= POINTS_TO_WIN){
+            else if (p2_score_ >= POINTS_TO_WIN) {
                 winner = 2;
             }
-            if (winner){
+            if (winner) {
                 std::cout << "Player " << winner << " wins!" << std::endl;
                 reset();
-                if (winner == 1){
+                if (winner == 1) {
                     showMessage("You win!");
                 }
                 else {
@@ -243,6 +263,15 @@ int PongGame::gameLoop() {
 void PongGame::playerScored(int scorer) {
     // Set this flag, which we check inside our game loop.
     scorer_ = scorer;
+    // play the woosh effect
+    sound_player_.setBuffer(miss_sound_);
+    sound_player_.play();
+}
+
+void PongGame::ballBounced() {
+    // play the bounce effect
+    sound_player_.setBuffer(ball_sound_);
+    sound_player_.play();
 }
 
 void PongGame::centerTextOrigin(sf::Text& text){
@@ -294,6 +323,18 @@ void PongGame::resetEntities() {
         new Paddle(sf::Vector2f(PADDLE_THICKNESS, PADDLE_HEIGHT), 
                    sf::Vector2f(window_size.x - PADDLE_BACK_DISTANCE,
                                 window_size.y / 2)));
+    
+    // add obstacle if desired
+    if (obstacle_){
+        entities_["o1"] = std::unique_ptr<Entity>(
+            new Paddle(sf::Vector2f(PADDLE_THICKNESS * 2, PADDLE_HEIGHT * 2 / 3), 
+                       sf::Vector2f(window_size.x / 2,
+                                window_size.y * 2 / 3)));
+        entities_["o2"] = std::unique_ptr<Entity>(
+            new Paddle(sf::Vector2f(PADDLE_THICKNESS * 2, PADDLE_HEIGHT * 2 / 3), 
+                       sf::Vector2f(window_size.x / 2,
+                                window_size.y / 3)));
+    }
 }
 
 void PongGame::resetScore() {
@@ -387,6 +428,14 @@ void PongGame::drawScore() {
     sf::Text difficulty_text(difficulty_str, font_);
     drawText(difficulty_text, CORNER_FONT_SIZE, 
              sf::Vector2f(10, 10), 
+             false, false);
+    
+    // draw obstacle indicator in top right
+    sf::Text obstacle_text(std::string("obstacle ") +
+                           (obstacle_ ? "enabled" : "disabled"), font_);
+    drawText(obstacle_text, CORNER_FONT_SIZE,
+             sf::Vector2f(window_->getSize().x - 
+                         (obstacle_text.getLocalBounds().width), 10),
              false, false);
 }
 

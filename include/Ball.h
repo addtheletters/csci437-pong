@@ -37,7 +37,8 @@ private:
     // The ball's radius
     float rad_;
     
-    // Interface to which the ball reports when it thinks a player has scored
+    // Interface to which the ball reports when it reaches certain states,
+    // such as for adding score or playing audio
     ScoreInterface* score_notify_;
 };
 
