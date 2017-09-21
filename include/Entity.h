@@ -32,7 +32,7 @@ public:
     sf::Vector2f getPos();
     
     // Place this entity at a new position
-    void setPos(sf::Vector2f new_position);
+    void setPos(sf::Vector2f pos);
     
     // Displace this entity relative to its current position
     void move(sf::Vector2f displacement);
@@ -41,7 +41,7 @@ public:
     sf::Vector2f getVel();
     
     // Set the current velocity
-    void setVel(sf::Vector2f new_velocity);
+    void setVel(sf::Vector2f vel);
     
     // Change the velocity's speed and angle
     void adjustVel(float speed_diff, float angle_diff);

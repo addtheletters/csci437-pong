@@ -8,9 +8,10 @@
 
 #include "Paddle.h"
 
-Ball::Ball(float radius, sf::Vector2f center){
+Ball::Ball(float radius, sf::Vector2f center, ScoreInterface* score_notify){
     rad_ = radius;
     pos_ = center;
+    score_notify_ = score_notify;
 }
 
 float Ball::getRad(){
@@ -26,18 +27,19 @@ void Ball::draw(sf::RenderWindow& window){
     circ.setRadius(rad_);
     circ.setOrigin(rad_, rad_);
     circ.setPosition(pos_);
+    circ.setFillColor(sf::Color(255, 165, 0));
     window.draw(circ);
 }
 
 void Ball::boop(){
     int boop_angle_index = (std::rand() % 360) - 180;
-    adjustVel(BOOP_SPEEDUP * .5, (1.0f * boop_angle_index) / (360 * BOOP_STABILITY) );
+    adjustVel(BOOP_SPEEDUP, (1.0f * boop_angle_index) / (360 * BOOP_STABILITY) );
     // trend to go towards the edges
     if (vel_.x < 0){
-        vel_.x -= BOOP_SPEEDUP * .5;
+        vel_.x -= BOOP_SPEEDUP;
     }
     else{
-        vel_.x += BOOP_SPEEDUP * .5;
+        vel_.x += BOOP_SPEEDUP;
     }
     
     std::cout << "Boop! - " << boop_angle_index << std::endl;
@@ -52,13 +54,13 @@ void Ball::tick(sf::Time delta, ENTITY_MAP& others, sf::Vector2u window_size){
     if (pos_.x + rad_ > window_size.x){
         pos_.x = window_size.x - rad_;
         vel_.x = -vel_.x;
-        //boop();
+        score_notify_->playerScored(1);
     }
     // left wall
     if (pos_.x - rad_ < 0){
         pos_.x = rad_;
         vel_.x = -vel_.x;
-        //boop();
+        score_notify_->playerScored(2);
     }
     // bottom wall
     if (pos_.y + rad_ > window_size.y){
@@ -83,7 +85,7 @@ void Ball::tick(sf::Time delta, ENTITY_MAP& others, sf::Vector2u window_size){
             int hits = paddle->checkBallCollision(getPos(), getRad());
             
             if (hits & Paddle::ContactStatus::TOP){
-                //std::cout << "Hit top of paddle " << it->first << std::endl;
+                std::cout << "Hit top of paddle " << it->first << std::endl;
                 if (vel_.y > 0){
                     vel_.y = -vel_.y;
                     //boop();
@@ -103,7 +105,7 @@ void Ball::tick(sf::Time delta, ENTITY_MAP& others, sf::Vector2u window_size){
                 vel_.y += (SPEED_INHERITANCE * paddle->getVel().y);
             }
             if (hits & Paddle::ContactStatus::BOTTOM){
-                //std::cout << "Hit bottom of paddle " << it->first << std::endl;
+                std::cout << "Hit bottom of paddle " << it->first << std::endl;
                 if (vel_.y < 0){
                     vel_.y = -vel_.y;
                     //boop();
