@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 
+// This class describes AI-controlled paddle behavior.
 class AutoPlayer {
 public:
     AutoPlayer(float away, float laziness) {

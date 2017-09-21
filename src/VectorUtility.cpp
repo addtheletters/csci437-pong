@@ -2,8 +2,6 @@
 
 #include <cmath>
 
-// This file holds implementations of utility functions.
-
 float vecutil::clamp(float val, float cmin, float cmax){
     return std::max(cmin, std::min(cmax, val));
 }

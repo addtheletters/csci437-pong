@@ -8,6 +8,8 @@
 #include "Paddle.h"
 #include "AutoPlayer.h"
 
+// This class represents the entirety of the running game.
+// It holds all relevant values and objects.
 class PongGame : ScoreInterface {
 public:
     // Initialize the game.

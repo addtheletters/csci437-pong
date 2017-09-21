@@ -1,9 +1,4 @@
- 
-//
-//  TODO write some description here
-//
-
-#include <SFML/Graphics.hpp>
+// Runs the game.
 
 #include "PongGame.h"
 
@@ -12,3 +7,4 @@ int main(int argc, char** argv) {
     game.init();
     return game.gameLoop();
 }
+

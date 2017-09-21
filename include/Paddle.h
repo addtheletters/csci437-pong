@@ -2,13 +2,14 @@
 #define PADDLE_H
 
 #include <SFML/Graphics.hpp>
+
 #include "Entity.h"
 
 // This class represents rectangular objects with which the ball may collide.
 // It handles detection of collisions with circular objects, but not resolution
 // of those collisions.
 // It can move vertically within the window's constraints.
-// Its' rectangle is centered on its' entity position.
+// Its rectangle is centered on its entity position.
 class Paddle : public Entity {
 public:
     // Enumerates possible sides of this paddle that may contact something 

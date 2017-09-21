@@ -23,3 +23,4 @@ AutoPlayer::Action AutoPlayer::getAIAction(sf::Vector2u window_size,
         return AutoPlayer::Action::MOVE_UP;
     }
 }
+

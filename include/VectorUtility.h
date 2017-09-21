@@ -1,3 +1,6 @@
+// This file contains declarations for helper utility functions, related
+// to doing math / vector operations.
+
 #ifndef VECUTIL_H
 #define VECUTIL_H
 
