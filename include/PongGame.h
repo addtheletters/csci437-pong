@@ -112,6 +112,9 @@ private:
     // center of the playing field.
     bool obstacle_ = false;
     
+    // whether or not the right paddle is AI-controlled
+    bool p2_ai_ = true;
+    
     // flag indicating someone has scored;
     // nonzero during loop iterations when someone has scored
     int scorer_ = 0;
