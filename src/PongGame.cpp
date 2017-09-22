@@ -327,9 +327,13 @@ void PongGame::resetEntities() {
     entities_["ball"] = std::unique_ptr<Entity>(
         new Ball(20, sf::Vector2f(window_size.x / 2, window_size.y / 2),
                  (ScoreInterface*)this));
-    // ball always starts heading towards the AI-paddle
+    // if p2 is AI, ball always starts heading towards the AI-paddle
     float ball_start_angle = BALL_START_ANGLE_RANGE
                              * (((std::rand() % 1000) / 1000.0) - 0.5);
+    if (!p2_ai_ && std::rand() % 2) {
+        ball_start_angle += 3.14159;
+    }
+                             
     entities_["ball"]->setVel(vecutil::fromPolar(BALL_START_SPEED,
                                                  ball_start_angle));
     
@@ -379,7 +383,7 @@ void PongGame::drawMenu() {
              true, true);
     
     // draw control information
-    sf::Text tutorial_text("[up]/[down] to move paddle\n"
+    sf::Text tutorial_text("[W]/[S] to move p1 paddle\n"
                            "[R] to reset game\n"
                            "[escape] to quit\n"
                            "[+]/[-] to adjust difficulty\n"
@@ -449,12 +453,11 @@ void PongGame::drawScore() {
              false, false);
     
     // draw obstacle / AI indicator in top right
-    sf::Text obstacle_text(std::string("obstacle ") +
+    sf::Text obstacle_text(std::string("[T] obstacle ") +
                            (obstacle_ ? "enabled" : "disabled") + "\n" +
-                           "p2 AI " + (p2_ai_ ? "enabled" : "disabled"), font_);
+                           "[I] p2 AI " + (p2_ai_ ? "enabled" : "disabled\n[up]/[down] to move p2 paddle"), font_);
     drawText(obstacle_text, CORNER_FONT_SIZE,
-             sf::Vector2f(window_->getSize().x - 
-                         (obstacle_text.getLocalBounds().width), 10),
+             sf::Vector2f(window_->getSize().x - 300, 10),
              false, false);
 }
 
