@@ -55,7 +55,8 @@ void PongGame::init() {
     
     // create AI controller
     ai_ = std::unique_ptr<AutoPlayer>(new AutoPlayer(-1.0f, 2.0f));
-    
+    ai_one_ = std::unique_ptr<AutoPlayer>(new AutoPlayer(1.0f, 2.0f));
+
     // load display font
     if (!font_.loadFromFile(FONT_FILENAME)){
         std::cout << "Is " << FONT_FILENAME 
@@ -98,7 +99,7 @@ int PongGame::gameLoop() {
             
             // Window resized
             else if (evnt.type == sf::Event::Resized) {
-                std::cout << "Window resized to " << evnt.size.width 
+                std::cout << "Window size set to " << evnt.size.width 
                           << "x" << evnt.size.height << std::endl;
                 window_->setView(sf::View(
                     sf::FloatRect(0, 0, evnt.size.width, evnt.size.height)));
@@ -150,12 +151,16 @@ int PongGame::gameLoop() {
                 else if (evnt.key.code == sf::Keyboard::I) {
                     p2_ai_ = !p2_ai_;
                 }
-                
+                // U toggles AI control of the left paddle ("player 1")
+                else if (evnt.key.code == sf::Keyboard::U) {
+                  p1_ai_ = !p1_ai_;
+                }
+
                 // Here are some "cheat codes," of sorts:
                 // B nudges the ball slightly, speeding it up
                 // and tweaking its trajectory like when it bounces
                 else if (evnt.key.code == sf::Keyboard::B) {
-                    dynamic_cast<Ball*>(entities_["ball"].get())->boop();
+                  dynamic_cast<Ball *>(entities_["ball"].get())->boop();
                 }
                 // pressing 1 emulates the human player scoring a point
                 else if (evnt.key.code == sf::Keyboard::Num1) {
@@ -204,13 +209,12 @@ int PongGame::gameLoop() {
             if (winner) {
                 std::cout << "Player " << winner << " wins!" << std::endl;
                 reset();
-                if (p2_ai_) {
-                    if (winner == 1) {
-                        showMessage("You win!");
-                    }
-                    else {
-                        showMessage("The computer wins :(");
-                    }
+                if (p2_ai_ && !p1_ai_) {
+                  if (winner == 1) {
+                    showMessage("You win!");
+                  } else {
+                    showMessage("The computer wins :(");
+                  }
                 }
                 else {
                     showMessage("Player " + std::to_string(winner) + " wins!");
@@ -221,10 +225,21 @@ int PongGame::gameLoop() {
         // read non-event input
         // move p1 paddle
         float p1_move_multiplier = 0;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+        if (p1_ai_) {
+          // move AI-controlled paddle
+          AutoPlayer::Action ai_action = ai_one_->getAIAction(
+              window_->getSize(), entities_["ball"]->getPos(),
+              entities_["ball"]->getVel(), entities_["p1"]->getPos());
+          if (ai_action == AutoPlayer::Action::MOVE_DOWN)
+            p1_move_multiplier = 1;
+          if (ai_action == AutoPlayer::Action::MOVE_UP)
+            p1_move_multiplier = -1;
+        } else {
+          if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
             p1_move_multiplier += 1;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+          if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
             p1_move_multiplier -= 1;
+        }
         applyPaddleInput("p1", p1_move_multiplier);
     
         // move p2 paddle
@@ -330,8 +345,8 @@ void PongGame::resetEntities() {
     // if p2 is AI, ball always starts heading towards the AI-paddle
     float ball_start_angle = BALL_START_ANGLE_RANGE
                              * (((std::rand() % 1000) / 1000.0) - 0.5);
-    if (!p2_ai_ && std::rand() % 2) {
-        ball_start_angle += 3.14159;
+    if ((!p2_ai_ || (p2_ai_ && p1_ai_)) && std::rand() % 2) {
+      ball_start_angle += 3.14159;
     }
                              
     entities_["ball"]->setVel(vecutil::fromPolar(BALL_START_SPEED,
@@ -455,7 +470,9 @@ void PongGame::drawScore() {
     // draw obstacle / AI indicator in top right
     sf::Text obstacle_text(std::string("[T] obstacle ") +
                            (obstacle_ ? "enabled" : "disabled") + "\n" +
-                           "[I] p2 AI " + (p2_ai_ ? "enabled" : "disabled\n[up]/[down] to move p2 paddle"), font_);
+                           "[I] p2 AI " + (p2_ai_ ? "enabled" : "disabled") + "\n" + 
+                           "[up]/[down] to move p2 paddle\n" +
+                           "[U] p1 AI " + (p1_ai_ ? "enabled" : "disabled\n"), font_);
     drawText(obstacle_text, CORNER_FONT_SIZE,
              sf::Vector2f(window_->getSize().x - 300, 10),
              false, false);

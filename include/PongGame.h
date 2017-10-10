@@ -112,6 +112,8 @@ private:
     // center of the playing field.
     bool obstacle_ = false;
     
+    // whether or not the left paddle is AI-controlled
+    bool p1_ai_ = false;
     // whether or not the right paddle is AI-controlled
     bool p2_ai_ = true;
     
@@ -125,6 +127,7 @@ private:
     
     // create AI controller
     std::unique_ptr<AutoPlayer> ai_;
+    std::unique_ptr<AutoPlayer> ai_one_;
     
     // set up map for entities
     ENTITY_MAP entities_;
