@@ -32,8 +32,6 @@
 *.app
 
 # CMake files
-CMakeLists.txt
-/cmake/
 /Debug/
 /Release/
 
